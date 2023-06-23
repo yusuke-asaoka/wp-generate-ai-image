@@ -1,7 +1,7 @@
 <?php 
 /*
 Plugin Name: Generate AI Image
-Plugin URI: https://example.com/
+Plugin URI: https://github.com/yusuke-asaoka/wp-generate-ai-image
 Description: This plugin generates AI images using openai generate image api.
 Version: 1.0
 Author: YUSUKE ASAOKA
