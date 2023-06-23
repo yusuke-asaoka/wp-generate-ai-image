@@ -1,7 +1,6 @@
 === Generate Ai Image ===
-Contributors: matt, wordpressdotorg
-Stable tag: 1.7.2
-Tested up to: 6.1
+Stable tag: 1.0.0
+Tested up to: 6.2.2
 Requires at least: 4.6
 License: GPLv2 or later
 
