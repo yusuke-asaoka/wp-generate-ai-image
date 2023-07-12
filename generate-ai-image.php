@@ -84,7 +84,12 @@ class Generate_Ai_Image_Plugin {
     // generate page
     public function render_generate_page() {
 
-      if (isset($_POST['generate_ai_image_save_submit']) && wp_verify_nonce($_POST['generate_ai_image_nonce'], 'generate_ai_image')) {
+      if (isset($_POST['generate_ai_image_save_submit'])) {
+        
+        if ( ! wp_verify_nonce( $_POST['generate_ai_image_nonce'], 'generate_ai_image' ) ) {
+          wp_die( 'Invalid nonce' );
+        }
+
         $base64_image = $_POST['image_src'];
         if ($base64_image != '') {
           $image_data = base64_decode($base64_image);
@@ -144,21 +149,29 @@ HTML;
     // setting page
     public function render_settings_page() {
       
-      if (isset($_POST['generate_ai_image_settings_submit']) && wp_verify_nonce($_POST['generate_ai_image_settings_nonce'], 'generate_ai_image_settings')) {
+      if (isset($_POST['generate_ai_image_settings_submit'])) {
+        
+        if ( ! wp_verify_nonce( $_POST['generate_ai_image_settings_nonce'], 'generate_ai_image_settings' ) ) {
+          wp_die( 'Invalid nonce' );
+        }
 
         $api_key = sanitize_text_field($_POST['generate_ai_image_api_key']);
         $size = isset($_POST['generate_ai_image_size']) ? sanitize_text_field($_POST['generate_ai_image_size']) : '512x512';
 
-        update_option('generate_ai_image_api_key', $api_key);
+        $current_api_key = get_option( 'generate_ai_image_api_key' );
+        $current_api_masked = $this->mask_api_key( $current_api_key );
+
+        if ( $api_key !== $current_api_masked ) {
+          update_option('generate_ai_image_api_key',  $this->unmask_api_key($api_key));
+        }
+        
         update_option('generate_ai_image_size', $size);
 
         echo '<div class="notice notice-success"><p>Settings have been saved.</p></div>';
     }
 
       $api_key = get_option('generate_ai_image_api_key');
-      $lastFour = mb_substr($api_key, -4);
-      $rest = mb_substr($api_key, 0, -4);
-      $masked = str_repeat("*", mb_strlen($rest)) . $lastFour;
+      $masked = $this->mask_api_key( $api_key );
       $size = get_option('generate_ai_image_size', 'medium') ?  get_option('generate_ai_image_size', 'medium') : "512x512";
       
       
@@ -185,7 +198,18 @@ HTML;
       </div>
       
 HTML;
-    }
+  }
+  private function mask_api_key( $api_key ) {
+    $lastFour = mb_substr( $api_key, -4 );
+    $rest = mb_substr( $api_key, 0, -4 );
+    $masked = str_repeat( "*", mb_strlen( $rest ) ) . $lastFour;
+    return $masked;
+  }
+
+  private function unmask_api_key( $masked_api_key ) {
+    $unmasked_api_key = str_replace( "*", "", $masked_api_key );
+    return $unmasked_api_key;
+}
 
 }
 
